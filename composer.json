@@ -1,0 +1,20 @@
+{
+    "name": "paliari/php-setup",
+    "description": "Setup basico para padronizar projeto",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Marcos Paliari",
+            "email": "marcos@paliari.com.br"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Paliari\\PhpSetup\\": "src"
+        }
+    },
+    "require": {
+        "php": "^7.1"
+    }
+}
