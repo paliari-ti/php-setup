@@ -41,7 +41,7 @@ class QB extends RansackQueryBuilder
      *
      * @return int
      */
-    public function getCurrentPage($page = null)
+    public function currentPage($page = null)
     {
         if (null !== $page) {
             if ($page < 1) {
@@ -61,12 +61,12 @@ class QB extends RansackQueryBuilder
      */
     public function page($page)
     {
-        $this->getCurrentPage($page);
+        $this->currentPage($page);
 
         return $this;
     }
 
-    public function totalCount()
+    public function count()
     {
         return $this->paginator()->count();
     }
@@ -74,9 +74,9 @@ class QB extends RansackQueryBuilder
     /**
      * @return int
      */
-    public function totalPages()
+    public function pages()
     {
-        return (int)ceil($this->totalCount() / $this->getPerPage());
+        return (int)ceil($this->count() / $this->getPerPage());
     }
 
     /**
@@ -105,9 +105,31 @@ class QB extends RansackQueryBuilder
 
     protected function resetPaginate()
     {
-        $this->setFirstResult(($this->getCurrentPage() - 1) * $this->getPerPage())
+        $this->setFirstResult(($this->currentPage() - 1) * $this->getPerPage())
              ->setMaxResults($this->getPerPage())
         ;
+    }
+
+    /**
+     * @param int   $page
+     * @param array $as_json_includes
+     * @param int   $per_page
+     *
+     * @return array
+     */
+    public function paginate(int $page = 1, array $as_json_includes = [], int $per_page = null)
+    {
+        $this->page($page);
+        if ($per_page) {
+            $this->setPerPage($per_page);
+        }
+
+        return [
+            'count' => $this->count(),
+            'page'  => $this->currentPage(),
+            'pages' => $this->pages(),
+            'rows'  => is_array($as_json_includes) ? $this->asJson($as_json_includes) : $this->getResult(),
+        ];
     }
 
 }
