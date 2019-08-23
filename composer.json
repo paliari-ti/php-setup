@@ -15,6 +15,9 @@
         }
     },
     "require": {
-        "php": "^7.1"
+        "php": "^7.3",
+        "paliari/doctrine-ransack": "^1.2",
+        "paliari/doctrine-validator": "^1.4",
+        "paliari/php-utils": "^1.1"
     }
 }
