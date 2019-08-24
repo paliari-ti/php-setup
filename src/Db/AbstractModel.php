@@ -343,7 +343,7 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
     }
 
     /**
-     * @return EntityManager
+     * @return EM
      */
     public static function getEm()
     {

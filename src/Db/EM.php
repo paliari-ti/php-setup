@@ -7,6 +7,13 @@ use Doctrine\Common\EventManager,
     Doctrine\ORM\EntityManager,
     Doctrine\ORM\ORMException;
 
+/**
+ * Class EM
+ *
+ * @method AbstractModel|null find($entityName, $id, $lockMode = null, $lockVersion = null)
+ *
+ * @package Paliari\PhpSetup\Db
+ */
 class EM extends EntityManager
 {
 
