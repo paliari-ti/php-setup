@@ -7,6 +7,7 @@ use Doctrine\Common\Inflector\Inflector;
 use Doctrine\Common\Persistence\Mapping\MappingException;
 use Doctrine\DBAL\LockMode;
 use Doctrine\DBAL\Types\Type;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\ClassMetadataInfo as Info;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
@@ -66,22 +67,6 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
 
     /**
      * @param mixed    $id
-     * @param int|null $lockMode
-     * @param int|null $lockVersion
-     *
-     * @return $this|null
-     *
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @throws TransactionRequiredException
-     */
-    protected static function doFind($id, $lockMode, $lockVersion)
-    {
-        return static::getEm()->find(static::className(), $id, $lockMode, $lockVersion);
-    }
-
-    /**
-     * @param mixed    $id
      * @param bool     $throw
      * @param int|null $lockMode
      * @param int|null $lockVersion
@@ -101,9 +86,11 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
         if ($id instanceof static) {
             return $id;
         }
-        $model = static::doFind($id, $lockMode, $lockVersion);
+        $model = static::getEm()->find(static::className(), $id, $lockMode, $lockVersion);
         if ($throw && null === $model) {
-            static::notFoundException($id);
+            $id        = var_export($id, true);
+            $model_hum = static::hum();
+            throw new NotFoundException("Não foi possível encontrar um registro '$model_hum' com o id $id");
         }
 
         return $model;
@@ -263,6 +250,29 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
         return $valid;
     }
 
+    protected function afterSave()
+    {
+    }
+
+    /**
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    protected function flush()
+    {
+        static::getEm()->flush($this);
+    }
+
+    /**
+     * Alias static::getEm()->persist($this);
+     *
+     * @throws ORMException
+     */
+    public function persist()
+    {
+        static::getEm()->persist($this);
+    }
+
     /**
      * @return static
      *
@@ -307,13 +317,24 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
     }
 
     /**
+     * @param QB    $qb
+     * @param array $params
+     *
+     * @return QB
+     */
+    protected static function qbRansack($qb, $params = [])
+    {
+        return Ransack::instance()->query($qb, static::className(), $params);
+    }
+
+    /**
      * @param array $params
      *
      * @return QB
      */
     public static function ransack($params = [])
     {
-        return Ransack::instance()->query(static::query(), static::className(), $params);
+        return static::qbRansack(static::query(), $params);
     }
 
     /**
@@ -323,7 +344,7 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
      */
     public static function ransackForUpdate($params = [])
     {
-        return Ransack::instance()->query(static::qbUpdate(), static::className(), $params);
+        return static::qbRansack(static::qbUpdate(), $params);
     }
 
     /**
@@ -334,6 +355,16 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
     public static function query($alias = 't')
     {
         return ModelUtil::query(static::className(), $alias);
+    }
+
+    /**
+     * @param string $alias
+     *
+     * @return QB
+     */
+    public static function qbUpdate($alias = 't')
+    {
+        return ModelUtil::qbUpdate(static::className(), $alias);
     }
 
     /**
@@ -478,13 +509,6 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
         return ModelUtil::getEm();
     }
 
-    protected static function notFoundException($id)
-    {
-        $id        = var_export($id, true);
-        $model_hum = static::hum();
-        throw new NotFoundException("Não foi possível encontrar um registro '$model_hum' com o id $id");
-    }
-
     public static function hasField($field)
     {
         return static::getClassMetadata()->hasField($field);
@@ -540,6 +564,9 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
         return A::get(static::getAssociationMapping($property), 'type');
     }
 
+    /**
+     * @return ClassMetadata
+     */
     public static function getClassMetadata()
     {
         return static::getEm()->getClassMetadata(static::className());
@@ -608,6 +635,15 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
         return $filters;
     }
 
+    protected function prepareSetValue($value, $type)
+    {
+        if (!in_array($type, [Type::OBJECT, Type::SIMPLE_ARRAY, Type::JSON_ARRAY, Type::TARRAY]) || is_string($value)) {
+            $value = ModelUtil::convertToPHPValue($value, $type);
+        }
+
+        return $value;
+    }
+
     private function tryAction($call, $throw = false)
     {
         try {
@@ -623,46 +659,6 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
         }
 
         return false;
-    }
-
-    /**
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
-    protected function flush()
-    {
-        static::getEm()->flush($this);
-    }
-
-    /**
-     * @throws ORMException
-     */
-    public function persist()
-    {
-        static::getEm()->persist($this);
-    }
-
-    protected function afterSave()
-    {
-    }
-
-    /**
-     * @param string $alias
-     *
-     * @return QB
-     */
-    public static function qbUpdate($alias = 't')
-    {
-        return ModelUtil::qbUpdate(static::className(), $alias);
-    }
-
-    protected function prepareSetValue($value, $type)
-    {
-        if (!in_array($type, [Type::OBJECT, Type::SIMPLE_ARRAY, Type::JSON_ARRAY, Type::TARRAY]) || is_string($value)) {
-            $value = ModelUtil::convertToPHPValue($value, $type);
-        }
-
-        return $value;
     }
 
 }

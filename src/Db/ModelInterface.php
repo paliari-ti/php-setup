@@ -3,6 +3,8 @@
 namespace Paliari\PhpSetup\Db;
 
 use Doctrine\DBAL\LockMode;
+use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\ORMException;
 use Paliari\Doctrine\ModelValidatorInterface;
 
 interface ModelInterface extends ModelValidatorInterface
@@ -199,5 +201,73 @@ interface ModelInterface extends ModelValidatorInterface
      * @return string
      */
     public function __toString();
+
+    /**
+     * @param string $field
+     *
+     * @return bool
+     */
+    public static function hasField($field);
+
+    /**
+     * @param string $field
+     *
+     * @return string
+     */
+    public static function typeOfField($field);
+
+    /**
+     * @param string $property
+     *
+     * @return bool
+     */
+    public static function hasAssociation($property);
+
+    /**
+     * @param string $property
+     *
+     * @return string|null
+     */
+    public static function targetEntity($property);
+
+    /**
+     * @param string $property
+     *
+     * @return array|null
+     */
+    public static function getAssociationMapping($property);
+
+    /**
+     * Obtem todos os mapeamentos de associacao de classe.
+     *
+     * @return array
+     */
+    public static function getAssociationMappings();
+
+    /**
+     * @param string $property
+     *
+     * @return int|null
+     */
+    public static function getAssociationType($property);
+
+    /**
+     * @return ClassMetadata
+     */
+    public static function getClassMetadata();
+
+    /**
+     * Alias static::getEm()->persist($this);
+     *
+     * @throws ORMException
+     */
+    public function persist();
+
+    /**
+     * @param string $alias
+     *
+     * @return QB
+     */
+    public static function qbUpdate($alias = 't');
 
 }
