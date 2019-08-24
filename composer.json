@@ -16,8 +16,11 @@
     },
     "require": {
         "php": "^7.3",
+        "ext-json": "*",
         "paliari/doctrine-ransack": "^1.2",
         "paliari/doctrine-validator": "^1.4",
-        "paliari/php-utils": "^1.1"
+        "paliari/php-utils": "^1.1",
+        "paliari/php-i18n": "^1.2",
+        "paliari/brasil": "^1.0"
     }
 }
