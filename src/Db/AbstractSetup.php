@@ -2,8 +2,19 @@
 
 namespace Paliari\PhpSetup\Db;
 
+use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\ORMException;
+use Paliari\PhpSetup\Db\Types\DbBool;
+use Paliari\PhpSetup\Db\Types\DbDate;
+use Paliari\PhpSetup\Db\Types\DbDateEnd;
+use Paliari\PhpSetup\Db\Types\DbDateStart;
+use Paliari\PhpSetup\Db\Types\DbDateTime;
+use Paliari\PhpSetup\Db\Types\DbDateTimeEnd;
+use Paliari\PhpSetup\Db\Types\DbDateTimeStart;
+use Paliari\PhpSetup\Db\Types\DbJsonArray;
+use Paliari\PhpSetup\Db\Types\DbMonth;
 
 abstract class AbstractSetup implements SetupInterface
 {
@@ -16,6 +27,7 @@ abstract class AbstractSetup implements SetupInterface
      *
      * @return Configuration
      * @throws ORMException
+     * @throws DBALException
      */
     public static function configure(array $db_params, bool $useSimpleAnnotationReader = false): Configuration
     {
@@ -62,7 +74,24 @@ abstract class AbstractSetup implements SetupInterface
         return 'Db\Proxies';
     }
 
-    abstract protected static function addTypes(): void;
+    /**
+     * @throws DBALException
+     */
+    protected static function addTypes()
+    {
+        Type::addType(DbBool::TYPE, DbBool::class);
+        Type::addType(DbDate::TYPE, DbDate::class);
+        Type::addType(DbDateEnd::TYPE, DbDateEnd::class);
+        Type::addType(DbDateStart::TYPE, DbDateStart::class);
+        Type::addType(DbDateTime::TYPE, DbDateTime::class);
+        Type::addType(DbDateTimeEnd::TYPE, DbDateTimeEnd::class);
+        Type::addType(DbDateTimeStart::TYPE, DbDateTimeStart::class);
+        Type::addType(DbJsonArray::TYPE, DbJsonArray::class);
+        Type::addType(DbMonth::TYPE, DbMonth::class);
+        static::addCustomTypes();
+    }
+
+    abstract protected static function addCustomTypes(): void;
 
     abstract protected static function addPathsI18n(): void;
 
