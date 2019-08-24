@@ -14,6 +14,7 @@ use Paliari\PhpSetup\Db\Types\DbDateTime;
 use Paliari\PhpSetup\Db\Types\DbDateTimeEnd;
 use Paliari\PhpSetup\Db\Types\DbDateTimeStart;
 use Paliari\PhpSetup\Db\Types\DbJsonArray;
+use Paliari\PhpSetup\Db\Types\DbMicroTime;
 use Paliari\PhpSetup\Db\Types\DbMonth;
 
 abstract class AbstractSetup implements SetupInterface
@@ -88,6 +89,7 @@ abstract class AbstractSetup implements SetupInterface
         Type::addType(DbDateTimeStart::TYPE, DbDateTimeStart::class);
         Type::addType(DbJsonArray::TYPE, DbJsonArray::class);
         Type::addType(DbMonth::TYPE, DbMonth::class);
+        Type::addType(DbMicroTime::TYPE, DbMicroTime::class);
         static::addCustomTypes();
     }
 
