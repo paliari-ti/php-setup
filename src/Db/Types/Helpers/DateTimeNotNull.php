@@ -3,9 +3,9 @@
 namespace Paliari\PhpSetup\Db\Types\Helpers;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform,
+    Paliari\Brasil\DateTime\DateTimeBr,
     Doctrine\DBAL\Types\DateType,
-    Exception,
-    DateTime;
+    Exception;
 
 /**
  * Class DateTimeNotNull
@@ -41,7 +41,7 @@ abstract class DateTimeNotNull extends DateType
      */
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {
-        $value = new DateTime($value ?: $this->defaultDate());
+        $value = new DateTimeBr($value ?: $this->defaultDate());
 
         return $value->format($platform->getDateFormatString());
     }
@@ -52,7 +52,7 @@ abstract class DateTimeNotNull extends DateType
      * @param string           $value
      * @param AbstractPlatform $platform
      *
-     * @return DateTime|null
+     * @return DateTimeBr|null
      * @throws Exception
      */
     public function convertToPHPValue($value, AbstractPlatform $platform)
@@ -61,7 +61,7 @@ abstract class DateTimeNotNull extends DateType
             return null;
         }
 
-        return new DateTime($value);
+        return new DateTimeBr($value);
     }
 
     protected function isEqDefault($value)
