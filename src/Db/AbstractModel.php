@@ -2,15 +2,26 @@
 
 namespace Paliari\PhpSetup\Db;
 
+use BadMethodCallException;
+use Doctrine\Common\Inflector\Inflector;
+use Doctrine\Common\Persistence\Mapping\MappingException;
 use Doctrine\DBAL\LockMode;
-use Doctrine\ORM\EntityManager;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
+use Doctrine\ORM\PessimisticLockException;
 use Doctrine\ORM\TransactionRequiredException;
+use Exception;
 use Paliari\Doctrine\AbstractValidatorModel;
+use Paliari\Doctrine\ModelException;
+use Paliari\Doctrine\Ransack;
+use Paliari\Utils\A;
+use ReflectionException;
 
 class AbstractModel extends AbstractValidatorModel implements ModelInterface
 {
+
+    use TraitModelNestedAttributes;
 
     /**
      * @param array $attributes
@@ -103,7 +114,19 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
      */
     public static function findOneBy($criteria)
     {
-        // TODO: Implement findOneBy() method.
+        if (empty($criteria)) {
+            return null;
+        }
+        $cache_id = static::cacheId($criteria);
+        if ($cache = ModelUtil::getCache($cache_id)) {
+            return $cache;
+        }
+        $rows = static::findBy($criteria, null, 1);
+        if ($model = isset($rows[0]) ? $rows[0] : null) {
+            ModelUtil::setCache($cache_id, $model);
+        }
+
+        return $model;
     }
 
     /**
@@ -111,10 +134,30 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
      * @param array $filter_fields
      *
      * @return $this
+     *
+     * @throws NotFoundException
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws TransactionRequiredException
      */
     public static function findOrInitializeBy($params, $filter_fields = [])
     {
-        // TODO: Implement findOrInitializeBy() method.
+        $model = isset($params['id']) ? static::find($params['id']) : null;
+        if ($model) {
+            $model->setAttributes($params);
+        } else {
+            $filter = A::sanitize($params, static::filtersByInitialize($filter_fields));
+            if ($model = static::findOneBy($filter)) {
+                $model->setAttributes($params);
+            } else {
+                $model = new static($params);
+                if ($filter) {
+                    ModelUtil::setCache(static::cacheId($filter), $model);
+                }
+            }
+        }
+
+        return $model;
     }
 
     /**
@@ -127,52 +170,100 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
      */
     public static function findBy($criteria, $orderBy = null, $limit = null, $offset = null)
     {
-        // TODO: Implement findBy() method.
+        foreach ($criteria as $k => $v) {
+            if ($type = static::typeOfField($k)) {
+                if (Type::TEXT == $type) {
+                    unset($criteria[$k]); // No oracle nao funciona find eq em campo text|clob
+                } else {
+                    $criteria[$k] = ModelUtil::convertToPHPValue($v, static::typeOfField($k));
+                }
+            } else {
+                unset($criteria[$k]);
+            }
+        }
+
+        return static::getEm()->getRepository(static::className())->findBy($criteria, $orderBy, $limit, $offset);
     }
 
     /**
-     * @param int      $lockMode
-     * @param int|null $lockVersion
+     * @param int  $lockMode
+     * @param null $lockVersion
+     *
+     * @throws OptimisticLockException
+     * @throws PessimisticLockException
      */
     public function lock($lockMode = LockMode::PESSIMISTIC_WRITE, $lockVersion = null)
     {
-        // TODO: Implement lock() method.
+        static::getEm()->lock($this, $lockMode, $lockVersion);
     }
 
     /**
      * @param bool $throw
      *
      * @return bool
+     *
+     * @throws MappingException
+     * @throws ModelException
      */
     public function destroy($throw = false)
     {
-        // TODO: Implement destroy() method.
+        $valid = $this->tryAction(function () {
+            static::getEm()->remove($this);
+            $this->flush();
+        }, $throw);
+        if (!$valid) {
+            @static::getEm()->clear($this);
+        }
+
+        return $valid;
     }
 
     /**
      * @param bool $throw
      *
      * @return bool
+     * @throws MappingException
+     * @throws ModelException
      */
     public function save($throw = false)
     {
-        // TODO: Implement save() method.
+        $valid = $this->tryAction(function () {
+            if ($this->_nested_attributes) {
+                ModelUtil::transaction(function () {
+                    $this->_saveWithNestedAttributes();
+                });
+            } else {
+                $this->persist();
+                $this->flush();
+                $this->afterSave();
+            }
+        }, $throw);
+        if (!$valid) {
+            @static::getEm()->clear($this);
+        }
+
+        return $valid;
     }
 
     /**
-     * @return $this
+     * @return static
+     *
+     * @throws MappingException
+     * @throws ReflectionException
      */
     public static function first()
     {
-        // TODO: Implement first() method.
+        return ModelUtil::first(static::className());
     }
 
     /**
-     * @return $this
+     * @return static
+     * @throws MappingException
+     * @throws ReflectionException
      */
     public static function last()
     {
-        // TODO: Implement last() method.
+        return ModelUtil::last(static::className());
     }
 
     /**
@@ -180,7 +271,7 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
      */
     public static function all()
     {
-        // TODO: Implement all() method.
+        return ModelUtil::all(static::className());
     }
 
     /**
@@ -192,7 +283,9 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
      */
     public static function exists($ransack_params = [])
     {
-        // TODO: Implement exists() method.
+        $rows = static::ransack($ransack_params)->select('1')->setMaxResults(1)->getArrayResult();
+
+        return count($rows) > 0;
     }
 
     /**
@@ -202,7 +295,7 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
      */
     public static function ransack($params = [])
     {
-        // TODO: Implement ransack() method.
+        return Ransack::instance()->query(static::query(), static::className(), $params);
     }
 
     /**
@@ -212,7 +305,7 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
      */
     public static function ransackForUpdate($params = [])
     {
-        // TODO: Implement ransackForUpdate() method.
+        return Ransack::instance()->query(static::qbUpdate(), static::className(), $params);
     }
 
     /**
@@ -222,7 +315,7 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
      */
     public static function query($alias = 't')
     {
-        // TODO: Implement query() method.
+        return ModelUtil::query(static::className(), $alias);
     }
 
     /**
@@ -231,17 +324,30 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
      */
     public function __set($name, $value)
     {
-        // TODO: Implement __set() method.
+        if (static::hasField($name)) {
+            $this->$name = $this->prepareSetValue($value, static::typeOfField($name));
+        } else {
+            $model = static::className();
+            throw new BadMethodCallException("Field '$model.$name' not found!");
+        }
     }
 
     /**
      * @param string $name
      *
-     * @return mixed
+     * @return mixed|null
      */
     public function __get($name)
     {
-        // TODO: Implement __get() method.
+        if ($this->__isset($name)) {
+            return $this->$name;
+        }
+        $method = 'get' . Inflector::classify($name);
+        if (method_exists($this, $method)) {
+            return $this->$method();
+        }
+
+        return null;
     }
 
     /**
@@ -251,7 +357,7 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
      */
     public function __isset($name)
     {
-        // TODO: Implement __isset() method.
+        return isset($this->$name) || static::hasField($name);
     }
 
     /**
@@ -355,6 +461,88 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
         $id        = var_export($id, true);
         $model_hum = static::hum();
         throw new NotFoundException("Não foi possível encontrar um registro '$model_hum' com o id $id");
+    }
+
+    public static function hasField($field)
+    {
+        return static::getClassMetadata()->hasField($field);
+    }
+
+    public static function typeOfField($field)
+    {
+        return static::getClassMetadata()->getTypeOfField($field);
+    }
+
+    public static function getClassMetadata()
+    {
+        return static::getEm()->getClassMetadata(static::className());
+    }
+
+    protected static function cacheId($params)
+    {
+        return static::className() . Convert::toJson($params);
+    }
+
+    protected static function filtersByInitialize($filters = [])
+    {
+        return $filters;
+    }
+
+    private function tryAction($call, $throw = false)
+    {
+        try {
+            $call();
+
+            return true;
+        } catch (ModelException $e) {
+            if ($throw) {
+                throw $e;
+            }
+        } catch (Exception $e) {
+            throw $e;
+        }
+
+        return false;
+    }
+
+    /**
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    protected function flush()
+    {
+        static::getEm()->flush($this);
+    }
+
+    /**
+     * @throws ORMException
+     */
+    public function persist()
+    {
+        static::getEm()->persist($this);
+    }
+
+    protected function afterSave()
+    {
+    }
+
+    /**
+     * @param string $alias
+     *
+     * @return QB
+     */
+    public static function qbUpdate($alias = 't')
+    {
+        return ModelUtil::qbUpdate(static::className(), $alias);
+    }
+
+    protected function prepareSetValue($value, $type)
+    {
+        if (!in_array($type, [Type::OBJECT, Type::SIMPLE_ARRAY, Type::JSON_ARRAY, Type::TARRAY]) || is_string($value)) {
+            $value = ModelUtil::convertToPHPValue($value, $type);
+        }
+
+        return $value;
     }
 
 }

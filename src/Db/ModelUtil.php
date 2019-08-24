@@ -223,6 +223,20 @@ class ModelUtil
     }
 
     /**
+     * @param string $model_name
+     * @param string $alias
+     *
+     * @return QB
+     */
+    public static function qbUpdate($model_name, $alias = 't')
+    {
+        $qb = new QB(static::getEm());
+        $qb->update($model_name, $alias);
+
+        return $qb;
+    }
+
+    /**
      * @param mixed  $value
      * @param string $type
      *

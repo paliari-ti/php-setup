@@ -46,7 +46,7 @@ trait TraitModelNestedAttributes
         foreach ($models as $model) {
             if (!$model->isValid()) {
                 if (!$this->errors) {
-                    $this->_validate();
+                    $this->validate();
                 }
                 $this->errors->add($attribute, $model->errors->toArray());
                 throw new ModelException($model->errors);
@@ -70,7 +70,7 @@ trait TraitModelNestedAttributes
         $this->persist();
         $this->_validateNestedAttributesAll();
         $this->_saveNestedAttributes(Info::MANY_TO_ONE);
-        static::getEm()->flush($this);
+        $this->flush();
         $this->_saveNestedAttributes(Info::ONE_TO_MANY);
         $this->_saveNestedAttributes(Info::MANY_TO_MANY);
         $this->_saveNestedAttributes(Info::ONE_TO_ONE);
