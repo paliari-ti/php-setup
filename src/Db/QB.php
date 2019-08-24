@@ -6,6 +6,38 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 use DomainException;
 use Paliari\Doctrine\RansackQueryBuilder;
 
+/**
+ * Class QB
+ *
+ * @method static QB create($em, string $model_name, string $alias = 't')
+ * @method QB select(mixed $select = null)
+ * @method QB addSelect(mixed $select = null)
+ * @method QB where(mixed $predicates)
+ * @method QB from(string $from, string $alias, string $indexBy = null)
+ * @method QB join(string $join, string $alias, string $conditionType = null, string $condition = null, string $indexBy = null)
+ * @method QB innerJoin(string $join, string $alias, string $conditionType = null, string $condition = null, string $indexBy = null)
+ * @method QB leftJoin(string $join, string $alias, string $conditionType = null, string $condition = null, string $indexBy = null)
+ * @method QB andWhere(mixed $where)
+ * @method QB orWhere(mixed $where)
+ * @method QB groupBy(mixed $groupBy)
+ * @method QB addGroupBy(mixed $groupBy)
+ * @method QB having(mixed $having)
+ * @method QB andHaving(mixed $having)
+ * @method QB orHaving(mixed $having)
+ * @method QB orderBy(string $sort, string $order = null)
+ * @method QB addOrderBy(string $sort, string $order = null)
+ * @method QB setParameter(string $key, mixed $value, string $type = null)
+ * @method QB setParameters(mixed $parameters)
+ * @method QB setFirstResult(integer $firstResult)
+ * @method QB setMaxResults(integer $maxResults)
+ * @method QB distinct(bool $flag)
+ * @method QB delete(string $delete = null, string $alias = null)
+ * @method QB update(string $update = null, string $alias = null)
+ * @method QB set(string $key, string $value)
+ * @method QB add(string $dqlPartName, string $dqlPart, bool $append = false)
+ *
+ * @package Paliari\PhpSetup\Db
+ */
 class QB extends RansackQueryBuilder
 {
 
