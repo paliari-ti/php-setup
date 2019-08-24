@@ -7,6 +7,7 @@ use Doctrine\Common\Inflector\Inflector;
 use Doctrine\Common\Persistence\Mapping\MappingException;
 use Doctrine\DBAL\LockMode;
 use Doctrine\DBAL\Types\Type;
+use Doctrine\ORM\Mapping\ClassMetadataInfo as Info;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\PessimisticLockException;
@@ -15,6 +16,8 @@ use Exception;
 use Paliari\Doctrine\AbstractValidatorModel;
 use Paliari\Doctrine\ModelException;
 use Paliari\Doctrine\Ransack;
+use Paliari\Doctrine\Validators\BaseValidator;
+use Paliari\I18n;
 use Paliari\Utils\A;
 use ReflectionException;
 
@@ -43,7 +46,22 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
      */
     public function setAttributes($attributes)
     {
-        // TODO: Implement setAttributes() method.
+        foreach ((array)$attributes as $name => $value) {
+            if ($this->hasField($name)) {
+                if (preg_match("/(.+)(_id$)/", $name, $matches) && $this->hasAssociation($matches[1])) {
+                    if (!BaseValidator::instance()->isBlank($value)) {
+                        $klass = static::targetEntity($matches[1]);
+                        $this->setAssociation($matches[1], $klass::find($value));
+                    }
+                } else {
+                    $this->$name = $this->prepareSetValue($value, static::typeOfField($name));
+                }
+            } else if ($this->hasAssociation($name)) {
+                $this->setAssociations($name, $value);
+            }
+        }
+
+        return $this;
     }
 
     /**
@@ -365,9 +383,9 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
      *
      * @return array
      */
-    public function toArray($options = [])
+    public function asJson($options = [])
     {
-        // TODO: Implement toArray() method.
+        return ModelUtil::export($this, $options, true);
     }
 
     /**
@@ -375,9 +393,9 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
      *
      * @return array
      */
-    public function asJson($options = [])
+    public function toArray($options = [])
     {
-        // TODO: Implement asJson() method.
+        return ModelUtil::export($this, $options, false);
     }
 
     /**
@@ -387,7 +405,7 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
      */
     public function toJson($options = [])
     {
-        // TODO: Implement toJson() method.
+        return json_encode($this->asJson($options));
     }
 
     /**
@@ -395,7 +413,7 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
      */
     public static function attributes()
     {
-        // TODO: Implement attributes() method.
+        return static::getClassMetadata()->getFieldNames();
     }
 
     /**
@@ -403,7 +421,7 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
      */
     public static function exportOnlyAttributes()
     {
-        // TODO: Implement exportOnlyAttributes() method.
+        return static::attributes();
     }
 
     /**
@@ -411,7 +429,7 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
      */
     public static function tableName()
     {
-        // TODO: Implement tableName() method.
+        return static::getClassMetadata()->getTableName();
     }
 
     /**
@@ -419,7 +437,7 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
      */
     public static function tableize()
     {
-        // TODO: Implement tableize() method.
+        return Inflector::tableize(static::className());
     }
 
     /**
@@ -427,7 +445,21 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
      */
     public static function hum()
     {
-        // TODO: Implement hum() method.
+        $table = static::tableize();
+
+        return I18n::instance()->hum("db.models.$table") ?: $table;
+    }
+
+    /**
+     * @param string $attribute
+     *
+     * @return string
+     */
+    public static function humAttribute($attribute)
+    {
+        $table = static::tableize();
+
+        return I18n::instance()->hum("db.attributes.$table.$attribute") ?: $attribute;
     }
 
     /**
@@ -435,17 +467,7 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
      */
     public function __toString()
     {
-        // TODO: Implement __toString() method.
-    }
-
-    /**
-     * @param string $name
-     *
-     * @return string
-     */
-    public static function humAttribute($name)
-    {
-        // TODO: Implement humAttribute() method.
+        return $this->toJson();
     }
 
     /**
@@ -453,7 +475,7 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
      */
     public static function getEm()
     {
-        // TODO: Implement getEm() method.
+        return ModelUtil::getEm();
     }
 
     protected static function notFoundException($id)
@@ -473,9 +495,107 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
         return static::getClassMetadata()->getTypeOfField($field);
     }
 
+    /**
+     * @param string $property
+     *
+     * @return bool
+     */
+    public static function hasAssociation($property)
+    {
+        return static::getClassMetadata()->hasAssociation($property);
+    }
+
+    public static function targetEntity($property)
+    {
+        return static::hasAssociation($property) ? static::getAssociationMapping($property)['targetEntity'] : null;
+    }
+
+    /**
+     * @param string $property
+     *
+     * @return array|null
+     */
+    public static function getAssociationMapping($property)
+    {
+        return static::hasAssociation($property) ? static::getAssociationMappings()[$property] : null;
+    }
+
+    /**
+     * Obtem todos os mapeamentos de associacao de classe.
+     *
+     * @return array
+     */
+    public static function getAssociationMappings()
+    {
+        return static::getClassMetadata()->getAssociationMappings();
+    }
+
+    /**
+     * @param string $property
+     *
+     * @return int|null
+     */
+    public static function getAssociationType($property)
+    {
+        return A::get(static::getAssociationMapping($property), 'type');
+    }
+
     public static function getClassMetadata()
     {
         return static::getEm()->getClassMetadata(static::className());
+    }
+
+    protected function setAssociations($name, $value)
+    {
+        $klass = static::targetEntity($name);
+        if (in_array(static::getAssociationType($name), [Info::ONE_TO_MANY, Info::MANY_TO_MANY])) {
+            foreach ($value as $item) {
+                $action = 'add';
+                if ($this->isTargetDestroy($name, $item)) {
+                    $action = 'remove';
+                    $model  = isset($item['id']) ? $klass::find($item['id']) : null;
+                    if ($model && Info::ONE_TO_MANY == static::getAssociationType($name)) {
+                        static::getEm()->remove($model);
+                    }
+                } else {
+                    $model = $this->findAssociation($klass, $item);
+                    $this->addNestedAttributes($name, $model);
+                }
+                $this->setAssociation(Inflector::singularize($name), $model, $action);
+            }
+        } else {
+            $model = $this->findAssociation($klass, $value);
+            $this->setAssociation($name, $model);
+            $this->addNestedAttributes($name, $model);
+        }
+    }
+
+    protected function isTargetDestroy($name, $item)
+    {
+        return static::isCascadeRemove($name) && isset($item['_destroy']);
+    }
+
+    protected static function isCascadeRemove($property)
+    {
+        return static::hasAssociation($property) ? static::getAssociationMapping($property)['isCascadeRemove'] : false;
+    }
+
+    protected static function isCascade($property)
+    {
+        return static::hasAssociation($property) ? !empty(static::getAssociationMapping($property)['cascade']) : false;
+    }
+
+    protected function setAssociation($association, $model, $action = 'set')
+    {
+        $method = $action . Inflector::classify($association);
+        if ($model && method_exists($this, $method)) {
+            $this->$method($model);
+        }
+    }
+
+    protected function findAssociation($klass, $value)
+    {
+        return $value ? $klass::findOrInitializeBy($value, ['id']) : null;
     }
 
     protected static function cacheId($params)
