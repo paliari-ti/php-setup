@@ -25,7 +25,10 @@ use ReflectionException;
 class AbstractModel extends AbstractValidatorModel implements ModelInterface
 {
 
-    use TraitModelNestedAttributes;
+    /**
+     * @var array
+     */
+    protected $_nested_attributes = [];
 
     /**
      * @param array $attributes
@@ -667,6 +670,87 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
         }
 
         return false;
+    }
+
+    protected function addNestedAttributes($attribute, $model)
+    {
+        if ($model) {
+            $type = static::getAssociationType($attribute);
+            if (isset($this->_nested_attributes[$type][$attribute])) {
+                $this->_nested_attributes[$type][$attribute][$this->oid($model)] = $model;
+            }
+        }
+    }
+
+    protected function isNestedAttributes($attribute)
+    {
+        $type = static::getAssociationType($attribute);
+
+        return isset($this->_nested_attributes[$type][$attribute]);
+    }
+
+    private function oid($model)
+    {
+        return $model->id ?: md5(spl_object_hash($model) . $model);
+    }
+
+    /**
+     * @throws ModelException
+     */
+    protected function _validateNestedAttributesAll()
+    {
+        foreach ($this->_nested_attributes as $nesteds) {
+            foreach ($nesteds as $attribute => $models) {
+                $this->_validateNestedAttributes($attribute, $models);
+            }
+        }
+    }
+
+    /**
+     * @param string   $attribute
+     * @param static[] $models
+     *
+     * @throws ModelException
+     */
+    protected function _validateNestedAttributes($attribute, $models)
+    {
+        foreach ($models as $model) {
+            if (!$model->isValid()) {
+                if (!$this->errors) {
+                    $this->validate();
+                }
+                $this->errors->add($attribute, $model->errors);
+                throw new ModelException($model->errors);
+            }
+        }
+    }
+
+    protected function _saveNestedAttributes($type)
+    {
+        if (isset($this->_nested_attributes[$type])) {
+            foreach ($this->_nested_attributes[$type] as $attr => $models) {
+                foreach ($models as $model) {
+                    $model->save(true);
+                }
+            }
+        }
+    }
+
+    /**
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws ModelException
+     */
+    protected function _saveWithNestedAttributes()
+    {
+        $this->persist();
+        $this->_validateNestedAttributesAll();
+        $this->_saveNestedAttributes(Info::MANY_TO_ONE);
+        $this->flush();
+        $this->_saveNestedAttributes(Info::ONE_TO_MANY);
+        $this->_saveNestedAttributes(Info::MANY_TO_MANY);
+        $this->_saveNestedAttributes(Info::ONE_TO_ONE);
+        $this->afterSave();
     }
 
 }
