@@ -1,0 +1,9 @@
+version: '3.5'
+
+services:
+  cli:
+    image: paliari/php7-apache
+    command: bash
+    volumes:
+      - .:/var/www/html:cached
+      - ~/.composer:/root/.composer
