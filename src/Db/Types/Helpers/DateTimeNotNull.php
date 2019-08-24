@@ -4,7 +4,7 @@ namespace Paliari\PhpSetup\Db\Types\Helpers;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform,
     Paliari\Brasil\DateTime\DateTimeBr,
-    Doctrine\DBAL\Types\DateType,
+    Doctrine\DBAL\Types\DateTimeType,
     Exception;
 
 /**
@@ -15,7 +15,7 @@ use Doctrine\DBAL\Platforms\AbstractPlatform,
  *
  * @package Db\Types\Helpers
  */
-abstract class DateTimeNotNull extends DateType
+abstract class DateTimeNotNull extends DateTimeType
 {
 
     const TYPE = 'db_date_time_not_null';
