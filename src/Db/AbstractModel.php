@@ -91,9 +91,7 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
         }
         $model = static::getEm()->find(static::className(), $id, $lockMode, $lockVersion);
         if ($throw && null === $model) {
-            $id        = var_export($id, true);
-            $model_hum = static::hum();
-            throw new NotFoundException("Não foi possível encontrar um registro '$model_hum' com o id $id");
+            NotFoundException::modelNotFound(static::className(), $id);
         }
 
         return $model;
