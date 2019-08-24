@@ -3,7 +3,6 @@
 namespace Paliari\PhpSetup\Db;
 
 use Doctrine\ORM\Configuration;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMException;
 
 abstract class AbstractSetup implements SetupInterface
@@ -34,7 +33,7 @@ abstract class AbstractSetup implements SetupInterface
     }
 
     /**
-     * @return EntityManager
+     * @return EM
      */
     public static function getEM()
     {
@@ -45,12 +44,12 @@ abstract class AbstractSetup implements SetupInterface
      * @param array         $db_params
      * @param Configuration $config
      *
-     * @return EntityManager
+     * @return EM
      * @throws ORMException
      */
     protected static function createEm(array $db_params, Configuration $config)
     {
-        return EntityManager::create($db_params, $config);
+        return EM::create($db_params, $config);
     }
 
     protected static function getPaths(): array
