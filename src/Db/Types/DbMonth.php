@@ -4,7 +4,7 @@ namespace Paliari\PhpSetup\Db\Types;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform,
     Paliari\Brasil\DateTime\DateMesBr,
-    Paliari\Brasil\DateTime\DateBr;
+    Doctrine\DBAL\Types\DateType;
 
 /**
  * Doctrine DB data Type customizado para mes referencia.
@@ -13,7 +13,7 @@ use Doctrine\DBAL\Platforms\AbstractPlatform,
  *
  * @package Paliari\PhpSetup\Db\Types
  */
-class DbMonth extends \Doctrine\DBAL\Types\DateType
+class DbMonth extends DateType
 {
 
     const TYPE = 'db_month';
@@ -33,7 +33,7 @@ class DbMonth extends \Doctrine\DBAL\Types\DateType
      */
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {
-        if (DateBr::isDate($value)) {
+        if (DateMesBr::isDate($value)) {
             $value = new DateMesBr($value);
 
             return $value->format($platform->getDateFormatString());

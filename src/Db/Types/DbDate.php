@@ -3,14 +3,15 @@
 namespace Paliari\PhpSetup\Db\Types;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform,
-    Paliari\Brasil\DateTime\DateBr;
+    Paliari\Brasil\DateTime\DateBr,
+    Doctrine\DBAL\Types\DateType;
 
 /**
  * Doctrine DB data Type customizado.
  *
  * @package Db\Types
  */
-class DbDate extends \Doctrine\DBAL\Types\DateType
+class DbDate extends DateType
 {
 
     const TYPE = 'db_date';
