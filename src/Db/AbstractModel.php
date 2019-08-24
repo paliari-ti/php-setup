@@ -452,7 +452,15 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
      */
     public static function exportOnlyAttributes()
     {
-        return static::attributes();
+        return array_diff(static::attributes(), static::hideAttributes());
+    }
+
+    /**
+     * @return array
+     */
+    public static function hideAttributes()
+    {
+        return [];
     }
 
     /**

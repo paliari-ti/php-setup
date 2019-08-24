@@ -54,7 +54,7 @@ class ModelUtil
     public static function export($model, $options = [], $json = false)
     {
         $ret  = [];
-        $cols = A::get($options, 'only') ?: $model->exportOnlyAttributes();
+        $cols = A::get($options, 'only') ?: $model::exportOnlyAttributes();
         foreach ($cols as $k) {
             $v = $model->$k;
             if ($json) {
