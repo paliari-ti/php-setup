@@ -2,6 +2,13 @@
 
 Setup basico para padronizar projeto
 
+## Install
+
+````bash
+composer require paliari/php-setup
+
+````
+
 ## Estrutura de diretorio
 
 ```
