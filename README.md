@@ -2,11 +2,69 @@
 
 Setup basico para padronizar projeto
 
+## Estrutura de diretorio
+
+```
+project
+│   README.md
+│   cli-config.php
+│   ...
+└───app
+│   │   Envs.php
+│   │   ...
+│   └───Controllers
+│       │   Auth.php
+│       │   Home.php
+│       │   ...
+│       Middlewares
+│       │   AuthMiddleware.php
+│       │   ...
+│       Repositories
+│       │   PessoaRepository.php
+│       │   UsuarioRepository.php
+│       │   ...
+│       Services
+│       │   AuthService.php
+│       │   ...
+│
+└───config
+│   │   AppSetup.php
+│   │   DbSetup.php
+│   │   Settings.php
+│   │   ...
+│   │
+│   └───Providers
+│       │   AuthProvider.php
+│       │   Registers.php
+│       │   ...
+│       Routes
+│       │   AuthRoute.php
+│       │   Router.php
+│       │   ...
+└───db
+│   │   ...
+│   └───models
+│       │   Pessoa.php
+│       │   Usuario.php
+│       │   ...
+│       Types
+│       │   DbCustomType.php
+│       │   ...
+└───public
+    │   favicon.ico
+    │   index.php
+    │   ...
+    └───assets
+        └───css
+        └───images
+
+```
+
 ## Exemplos
 
 ### DbSetup
 
-Config/DbSetup.php
+config/DbSetup.php
 
 ````php
 
@@ -144,7 +202,7 @@ class PessoaRepository extends AbstractRepository
 
 ### Settings
 
-Config/Settings.php
+config/Settings.php
 
 ````php
 <?php
@@ -186,9 +244,57 @@ class Settings implements SettingsInterface
 
 ````
 
+### AppSetup
+
+config/AppSetup.php
+
+````php
+<?php
+
+namespace Config;
+
+use Paliari\PhpSetup\Config\AppSetupInterface;
+use Config\Providers\Registers;
+use Db\Session\SessionHandler;
+use Config\Routes\Router;
+use Slim\App;
+
+class AppSetup implements AppSetupInterface
+{
+
+    /**
+     * @var App
+     */
+    protected static $_app;
+
+    /**
+     * @return App
+     */
+    public static function app(): App
+    {
+        if (!static::$_app) {
+            static::$_app = new App(Settings::get());
+            static::setup(static::$_app);
+        }
+
+        return static::$_app;
+    }
+
+    protected static function setup(App $app): void
+    {
+        define('ROOT_APP', dirname(__DIR__));
+        Database::register($app->getContainer());
+        Registers::register($app->getContainer());
+        Router::register($app);
+    }
+
+}
+
+````
+
 ### Providers
 
-Config/Providers/AuthProvider.php
+config/Providers/AuthProvider.php
 
 ````php
 <?php
@@ -215,7 +321,7 @@ abstract class AuthProvider implements ProvidableInterface
 
 ````
 
-Config/Providers/Registers.php
+config/Providers/Registers.php
 
 ````php
 <?php
@@ -244,7 +350,7 @@ abstract class Registers implements RegistersInterface
 
 ### Router
 
-Config/Routes/Router.php
+config/Routes/Router.php
 
 ````php
 <?php
@@ -288,7 +394,7 @@ class Router implements RouterInterface
 
 ````
 
-Config/Routes/AuthRoute.php
+config/Routes/AuthRoute.php
 
 ````php
 <?php
@@ -319,4 +425,52 @@ class AuthRoute implements RoutableInterface
 
 ````
 
+### Envs
 
+app/Envs.php
+
+````php
+<?php
+use Paliari\Utils\Url,
+    Paliari\Utils\A;
+
+/**
+ * Class Envs
+ *
+ * @property-read string APP_ENV
+ * @property-read string BASE_URL
+ * @property-read string DB_DRIVER
+ * @property-read string DB_HOST
+ * @property-read string DB_PORT
+ * @property-read string DB_NAME
+ * @property-read string DB_USER
+ * @property-read string DB_PWD
+ */
+class Envs
+{
+
+    protected static $_instance;
+
+    /**
+     * @return static
+     */
+    public static function i()
+    {
+        return static::$_instance = static::$_instance ?: new static();
+    }
+
+    public function __get($key)
+    {
+        return A::get($_ENV, $key);
+    }
+
+    public function host()
+    {
+        $u = Url::parse($this->BASE_URL);
+
+        return "$u->scheme://$u->host";
+    }
+
+}
+
+````
