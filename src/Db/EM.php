@@ -19,7 +19,7 @@ class EM extends EntityManager
 
     public function clear($entityName = null)
     {
-        ModelUtil::$cache = [];
+        ModelUtil::clearCache();
         parent::clear($entityName);
     }
 

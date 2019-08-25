@@ -364,4 +364,9 @@ class ModelUtil
         return isset(static::$cache[$cache_id]) ? static::$cache[$cache_id] : null;
     }
 
+    public static function clearCache()
+    {
+        static::$cache = [];
+    }
+
 }
