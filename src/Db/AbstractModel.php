@@ -2,26 +2,35 @@
 
 namespace Paliari\PhpSetup\Db;
 
-use BadMethodCallException;
-use Doctrine\Common\Inflector\Inflector;
-use Doctrine\Common\Persistence\Mapping\MappingException;
-use Doctrine\DBAL\LockMode;
-use Doctrine\DBAL\Types\Type;
-use Doctrine\ORM\Mapping\ClassMetadata;
-use Doctrine\ORM\Mapping\ClassMetadataInfo as Info;
-use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
-use Doctrine\ORM\PessimisticLockException;
-use Doctrine\ORM\TransactionRequiredException;
-use Exception;
-use Paliari\Doctrine\AbstractValidatorModel;
-use Paliari\Doctrine\ModelException;
-use Paliari\Doctrine\Ransack;
-use Paliari\Doctrine\Validators\BaseValidator;
-use Paliari\I18n;
-use Paliari\Utils\A;
-use ReflectionException;
+use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Persistence\Mapping\MappingException,
+    Doctrine\ORM\Mapping\ClassMetadataInfo as Info,
+    Paliari\Doctrine\Validators\BaseValidator,
+    Doctrine\ORM\TransactionRequiredException,
+    Paliari\Doctrine\AbstractValidatorModel,
+    Doctrine\ORM\PessimisticLockException,
+    Doctrine\ORM\OptimisticLockException,
+    Doctrine\Common\Inflector\Inflector,
+    Doctrine\ORM\Mapping\ClassMetadata,
+    Paliari\Doctrine\ModelException,
+    Doctrine\ORM\ORMException,
+    Doctrine\DBAL\Types\Type,
+    Paliari\Doctrine\Ransack,
+    BadMethodCallException,
+    Doctrine\DBAL\LockMode,
+    ReflectionException,
+    Paliari\Utils\A,
+    Paliari\I18n,
+    Exception;
 
+/**
+ * Class AbstractModel
+ *
+ * @ORM\MappedSuperclass
+ * @ORM\HasLifecycleCallbacks
+ *
+ * @package Paliari\PhpSetup\Db
+ */
 class AbstractModel extends AbstractValidatorModel implements ModelInterface
 {
 
