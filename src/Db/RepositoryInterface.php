@@ -2,8 +2,6 @@
 
 namespace Paliari\PhpSetup\Db;
 
-use Doctrine\ORM\EntityManager;
-
 interface RepositoryInterface
 {
 
@@ -23,10 +21,5 @@ interface RepositoryInterface
      * @return QB
      */
     public static function ransack(array $params);
-
-    /**
-     * @return EntityManager
-     */
-    public static function getEM();
 
 }
