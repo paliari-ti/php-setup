@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7d0c3eb611601bb1c5220771aaaf4bf8",
+    "content-hash": "4f50100a7e49eeb105839e6c264ec822",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -1041,16 +1041,16 @@
         },
         {
             "name": "paliari/doctrine-validator",
-            "version": "1.4.3",
+            "version": "1.4.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/paliari/doctrine-validator.git",
-                "reference": "45c02c1404c6c64d4074594f1001a2a11e7109f0"
+                "reference": "e98f68b407ad45c355389e677eb7d9795d6e2832"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/paliari/doctrine-validator/zipball/45c02c1404c6c64d4074594f1001a2a11e7109f0",
-                "reference": "45c02c1404c6c64d4074594f1001a2a11e7109f0",
+                "url": "https://api.github.com/repos/paliari/doctrine-validator/zipball/e98f68b407ad45c355389e677eb7d9795d6e2832",
+                "reference": "e98f68b407ad45c355389e677eb7d9795d6e2832",
                 "shasum": ""
             },
             "require": {
@@ -1079,7 +1079,7 @@
             ],
             "description": "Advanced model validator for Doctrine ORM (based on ActiveRecord)",
             "homepage": "https://github.com/paliari/doctrine-validator",
-            "time": "2019-08-23T17:51:10+00:00"
+            "time": "2019-08-26T12:35:22+00:00"
         },
         {
             "name": "paliari/php-date-time",
