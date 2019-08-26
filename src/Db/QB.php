@@ -5,6 +5,7 @@ namespace Paliari\PhpSetup\Db;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use DomainException;
 use Paliari\Doctrine\RansackQueryBuilder;
+use Paliari\PhpSetup\Db\VO\PaginatedVO;
 
 /**
  * Class QB
@@ -73,7 +74,7 @@ class QB extends RansackQueryBuilder
      *
      * @return int
      */
-    public function currentPage($page = null)
+    public function currentPage($page = null): int
     {
         if (null !== $page) {
             if ($page < 1) {
@@ -98,7 +99,7 @@ class QB extends RansackQueryBuilder
         return $this;
     }
 
-    public function count()
+    public function count(): int
     {
         return $this->paginator()->count();
     }
@@ -106,7 +107,7 @@ class QB extends RansackQueryBuilder
     /**
      * @return int
      */
-    public function pages()
+    public function pages(): int
     {
         return (int)ceil($this->count() / $this->getPerPage());
     }
@@ -114,7 +115,7 @@ class QB extends RansackQueryBuilder
     /**
      * @return int
      */
-    public function getPerPage()
+    public function getPerPage(): void
     {
         return $this->_per_page;
     }
@@ -135,7 +136,7 @@ class QB extends RansackQueryBuilder
         return $this;
     }
 
-    protected function resetPaginate()
+    protected function resetPaginate(): void
     {
         $this->setFirstResult(($this->currentPage() - 1) * $this->getPerPage())
              ->setMaxResults($this->getPerPage())
@@ -147,21 +148,42 @@ class QB extends RansackQueryBuilder
      * @param array $as_json_includes
      * @param int   $per_page
      *
-     * @return array
+     * @return PaginatedVO
      */
-    public function paginate(int $page = 1, array $as_json_includes = [], int $per_page = null)
+    public function paginate(int $page = 1, array $as_json_includes = [], int $per_page = null): PaginatedVO
+    {
+        $paginated_vo       = $this->newPaginatedVO($page, $per_page);
+        $paginated_vo->rows = $this->asJson($as_json_includes);
+
+        return $paginated_vo;
+    }
+
+    /**
+     * @param int $page
+     * @param int $per_page
+     *
+     * @return PaginatedVO
+     */
+    public function paginateModels(int $page = 1, int $per_page = null): PaginatedVO
+    {
+        $paginated_vo       = $this->newPaginatedVO($page, $per_page);
+        $paginated_vo->rows = $this->getResult();
+
+        return $paginated_vo;
+    }
+
+    protected function newPaginatedVO(int $page = 1, int $per_page = null): PaginatedVO
     {
         $this->page($page);
         if ($per_page) {
             $this->setPerPage($per_page);
         }
+        $paginated_vo        = new PaginatedVO();
+        $paginated_vo->count = $this->count();
+        $paginated_vo->page  = $this->currentPage();
+        $paginated_vo->pages = $this->pages();
 
-        return [
-            'count' => $this->count(),
-            'page'  => $this->currentPage(),
-            'pages' => $this->pages(),
-            'rows'  => is_array($as_json_includes) ? $this->asJson($as_json_includes) : $this->getResult(),
-        ];
+        return $paginated_vo;
     }
 
 }

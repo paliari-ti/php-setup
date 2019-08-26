@@ -2,6 +2,8 @@
 
 namespace Paliari\PhpSetup\Db;
 
+use Paliari\PhpSetup\Db\VO\PaginatedVO;
+
 abstract class AbstractRepository implements RepositoryInterface
 {
 
@@ -92,6 +94,21 @@ abstract class AbstractRepository implements RepositoryInterface
         $model = static::modelName();
 
         return $model::ransack($params);
+    }
+
+    /**
+     * @param array    $params
+     * @param int      $page
+     * @param array    $as_json_includes
+     * @param int|null $per_page
+     *
+     * @return PaginatedVO
+     */
+    public static function paginate(array $params, int $page = 1, array $as_json_includes = [], int $per_page = null): PaginatedVO
+    {
+        $qb = static::ransack($params);
+
+        return $qb->paginate($page, $as_json_includes, $per_page);
     }
 
 }

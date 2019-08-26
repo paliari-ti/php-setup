@@ -2,6 +2,8 @@
 
 namespace Paliari\PhpSetup\Db;
 
+use Paliari\PhpSetup\Db\VO\PaginatedVO;
+
 interface RepositoryInterface
 {
 
@@ -21,5 +23,7 @@ interface RepositoryInterface
      * @return QB
      */
     public static function ransack(array $params);
+
+    public static function paginate(array $params, int $page = 1, array $as_json_includes = [], int $per_page = null): PaginatedVO;
 
 }
