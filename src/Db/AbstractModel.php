@@ -2,14 +2,13 @@
 
 namespace Paliari\PhpSetup\Db;
 
-use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Persistence\Mapping\MappingException,
     Doctrine\ORM\Mapping\ClassMetadataInfo as Info,
     Paliari\Doctrine\Validators\BaseValidator,
     Doctrine\ORM\TransactionRequiredException,
-    Paliari\Doctrine\AbstractValidatorModel,
     Doctrine\ORM\PessimisticLockException,
     Doctrine\ORM\OptimisticLockException,
+    Paliari\Doctrine\TraitValidatorModel,
     Doctrine\Common\Inflector\Inflector,
     Doctrine\ORM\Mapping\ClassMetadata,
     Paliari\Doctrine\ModelException,
@@ -26,13 +25,12 @@ use Doctrine\Common\Persistence\Mapping\MappingException,
 /**
  * Class AbstractModel
  *
- * @ORM\MappedSuperclass
- * @ORM\HasLifecycleCallbacks
- *
  * @package Paliari\PhpSetup\Db
  */
-class AbstractModel extends AbstractValidatorModel implements ModelInterface
+class AbstractModel implements ModelInterface
 {
+
+    use TraitValidatorModel;
 
     /**
      * @var array
