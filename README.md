@@ -94,17 +94,6 @@ class Settings implements SettingsInterface
             'settings' => [
                 'displayErrorDetails'    => getenv('APP_ENV') === 'dev',
                 'addContentLengthHeader' => false,
-                'database'               => [
-                    'driver'        => getenv('DB_DRIVER'),
-                    'host'          => getenv('DB_HOST'),
-                    'port'          => getenv('DB_PORT'),
-                    'dbname'        => getenv('DB_NAME'),
-                    'user'          => getenv('DB_USER'),
-                    'password'      => getenv('DB_PASSWORD'),
-                    'service'       => true,
-                    'charset'       => 'UTF8',
-                    'driverOptions' => ['charset' => 'UTF8'],
-                ],
             ],
         ];
     }
@@ -118,7 +107,6 @@ class Settings implements SettingsInterface
 config/DbSetup.php
 
 ````php
-
 <?php
 
 namespace Config;
@@ -148,6 +136,22 @@ class DbSetup extends AbstractSetup
     {
         return ROOT_APP . '/db/models';
     }
+
+    protected static function dbParams(): array
+    {
+        return [
+            'driver'        => getenv('DB_DRIVER'),
+            'host'          => getenv('DB_HOST'),
+            'port'          => getenv('DB_PORT'),
+            'dbname'        => getenv('DB_NAME'),
+            'user'          => getenv('DB_USER'),
+            'password'      => getenv('DB_PASSWORD'),
+            'service'       => true,
+            'charset'       => 'UTF8',
+            'driverOptions' => ['charset' => 'UTF8'],
+        ];
+    }
+    
 }
 
 ````

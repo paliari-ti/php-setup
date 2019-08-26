@@ -23,14 +23,13 @@ abstract class AbstractSetup implements SetupInterface
     protected static $_em;
 
     /**
-     * @param array $db_params
-     * @param bool  $useSimpleAnnotationReader
+     * @param bool $useSimpleAnnotationReader
      *
      * @return Configuration
      * @throws ORMException
      * @throws DBALException
      */
-    public static function configure(array $db_params, bool $useSimpleAnnotationReader = false): Configuration
+    public static function configure(bool $useSimpleAnnotationReader = false): Configuration
     {
         $config     = new Configuration();
         $driverImpl = $config->newDefaultAnnotationDriver(static::getPaths(), $useSimpleAnnotationReader);
@@ -38,7 +37,7 @@ abstract class AbstractSetup implements SetupInterface
         $config->setProxyDir(static::getProxyDir());
         $config->setProxyNamespace(static::getProxyNamespace());
         $config->setAutoGenerateProxyClasses(false);
-        static::$_em = static::createEm($db_params, $config);
+        static::$_em = static::createEm(static::dbParams(), $config);
         static::addTypes();
         static::addPathsI18n();
 
@@ -98,5 +97,7 @@ abstract class AbstractSetup implements SetupInterface
     }
 
     abstract protected static function addPathsI18n(): void;
+
+    abstract protected static function dbParams(): array;
 
 }
