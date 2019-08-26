@@ -17,7 +17,6 @@ project
 │   cli-config.php
 │   ...
 └───app
-│   │   Envs.php
 │   │   ...
 │   └───Controllers
 │       │   Auth.php
@@ -37,6 +36,7 @@ project
 └───config
 │   │   AppSetup.php
 │   │   DbSetup.php
+│   │   Envs.php
 │   │   Settings.php
 │   │   ...
 │   │
@@ -68,6 +68,50 @@ project
 ```
 
 ## Exemplos
+
+### Settings
+
+config/Settings.php
+
+````php
+<?php
+
+namespace Config;
+
+use Paliari\PhpSetup\Config\SettingsInterface;
+
+/**
+ * Class Settings
+ *
+ * @package Config
+ */
+class Settings implements SettingsInterface
+{
+
+    public static function get(): array
+    {
+        return [
+            'settings' => [
+                'displayErrorDetails'    => getenv('APP_ENV') === 'dev',
+                'addContentLengthHeader' => false,
+                'database'               => [
+                    'driver'        => getenv('DB_DRIVER'),
+                    'host'          => getenv('DB_HOST'),
+                    'port'          => getenv('DB_PORT'),
+                    'dbname'        => getenv('DB_NAME'),
+                    'user'          => getenv('DB_USER'),
+                    'password'      => getenv('DB_PASSWORD'),
+                    'service'       => true,
+                    'charset'       => 'UTF8',
+                    'driverOptions' => ['charset' => 'UTF8'],
+                ],
+            ],
+        ];
+    }
+
+}
+
+````
 
 ### DbSetup
 
@@ -201,50 +245,6 @@ class PessoaRepository extends AbstractRepository
     protected static function modelName(): string
     {
         return Pessoa::className();
-    }
-
-}
-
-````
-
-### Settings
-
-config/Settings.php
-
-````php
-<?php
-
-namespace Config;
-
-use Paliari\PhpSetup\Config\SettingsInterface;
-
-/**
- * Class Settings
- *
- * @package Config
- */
-class Settings implements SettingsInterface
-{
-
-    public static function get(): array
-    {
-        return [
-            'settings' => [
-                'displayErrorDetails'    => getenv('APP_ENV') === 'dev',
-                'addContentLengthHeader' => false,
-                'database'               => [
-                    'driver'        => getenv('DB_DRIVER'),
-                    'host'          => getenv('DB_HOST'),
-                    'port'          => getenv('DB_PORT'),
-                    'dbname'        => getenv('DB_NAME'),
-                    'user'          => getenv('DB_USER'),
-                    'password'      => getenv('DB_PASSWORD'),
-                    'service'       => true,
-                    'charset'       => 'UTF8',
-                    'driverOptions' => ['charset' => 'UTF8'],
-                ],
-            ],
-        ];
     }
 
 }
