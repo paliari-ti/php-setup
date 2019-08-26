@@ -78,7 +78,7 @@ abstract class AbstractSetup implements SetupInterface
     /**
      * @throws DBALException
      */
-    protected static function addTypes()
+    final private static function addTypes()
     {
         Type::addType(DbBool::TYPE, DbBool::class);
         Type::addType(DbDate::TYPE, DbDate::class);
@@ -93,7 +93,9 @@ abstract class AbstractSetup implements SetupInterface
         static::addCustomTypes();
     }
 
-    abstract protected static function addCustomTypes(): void;
+    protected static function addCustomTypes(): void
+    {
+    }
 
     abstract protected static function addPathsI18n(): void;
 

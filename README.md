@@ -154,7 +154,7 @@ class DbSetup extends AbstractSetup
 
 ### Model
 
-db/models/Pessoa.php
+models/Pessoa.php
 
 ````php
 
@@ -434,10 +434,12 @@ class AuthRoute implements RoutableInterface
 
 ### Envs
 
-app/Envs.php
+config/Envs.php
 
 ````php
 <?php
+namespace Config;
+
 use Paliari\Utils\Url,
     Paliari\Utils\A;
 
