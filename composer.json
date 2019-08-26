@@ -22,6 +22,7 @@
         "paliari/doctrine-validator": "^1.4",
         "paliari/php-utils": "^1.1",
         "paliari/php-i18n": "^1.2",
-        "paliari/brasil": "^1.0"
+        "paliari/brasil": "^1.0",
+        "slim/slim": "^4.2"
     }
 }
