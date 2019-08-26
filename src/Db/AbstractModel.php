@@ -227,7 +227,7 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
             $this->flush();
         }, $throw);
         if (!$valid) {
-            @static::getEm()->clear($this);
+            @static::getEm()->clear($this::className());
         }
 
         return $valid;
@@ -254,7 +254,7 @@ class AbstractModel extends AbstractValidatorModel implements ModelInterface
             }
         }, $throw);
         if (!$valid) {
-            @static::getEm()->clear($this);
+            @static::getEm()->clear($this::className());
         }
 
         return $valid;
