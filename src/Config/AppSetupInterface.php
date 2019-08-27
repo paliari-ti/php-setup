@@ -2,12 +2,9 @@
 
 namespace Paliari\PhpSetup\Config;
 
+use Slim\App;
+
 interface AppSetupInterface
 {
-    /**
-     * Deve retornar a instacia do App.
-     *
-     * @return mixed
-     */
-    public static function app();
+    public static function app(): App;
 }
