@@ -38,8 +38,10 @@ abstract class AbstractSetup implements SetupInterface
         $config->setProxyNamespace(static::getProxyNamespace());
         $config->setAutoGenerateProxyClasses(false);
         static::$_em = static::createEm(static::dbParams(), $config);
+        static::customConfig($config);
         static::addTypes();
         static::addPathsI18n();
+        static::customValidators();
 
         return $config;
     }
@@ -93,6 +95,14 @@ abstract class AbstractSetup implements SetupInterface
     }
 
     protected static function addCustomTypes(): void
+    {
+    }
+
+    protected static function customConfig(Configuration $config): void
+    {
+    }
+
+    protected static function customValidators(): void
     {
     }
 
