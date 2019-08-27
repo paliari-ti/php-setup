@@ -8,7 +8,7 @@ use Doctrine\ORM\EntityManager;
 interface SetupInterface
 {
 
-    public static function configure(bool $useSimpleAnnotationReader = false): Configuration;
+    public static function configure(array $db_params, bool $useSimpleAnnotationReader = false): Configuration;
 
     public static function getProxyDir(): string;
 
