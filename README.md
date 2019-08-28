@@ -142,25 +142,30 @@ class DbSetup extends AbstractSetup
 ````
 
 
-boot.php
+config/DbSettings.php
 
 ````php
 <?php
 
-require __DIR__ . '/vendor/autoload.php';
+class DbSettings implements SettingsInterface
+{
 
-$db_params = [
-    'driver'        => getenv('DB_DRIVER'),
-    'host'          => getenv('DB_HOST'),
-    'port'          => getenv('DB_PORT'),
-    'dbname'        => getenv('DB_NAME'),
-    'user'          => getenv('DB_USER'),
-    'password'      => getenv('DB_PASSWORD'),
-    'service'       => true,
-    'charset'       => 'UTF8',
-    'driverOptions' => ['charset' => 'UTF8'],
-];
-$config = \Config\DbSetup::configure($db_params);\
+    public static function get(): array
+    {
+        return [
+               'driver'        => getenv('DB_DRIVER'),
+               'host'          => getenv('DB_HOST'),
+               'port'          => getenv('DB_PORT'),
+               'dbname'        => getenv('DB_NAME'),
+               'user'          => getenv('DB_USER'),
+               'password'      => getenv('DB_PASSWORD'),
+               'service'       => true,
+               'charset'       => 'UTF8',
+               'driverOptions' => ['charset' => 'UTF8'],
+           ];
+    }
+
+}
 
 ````
 
