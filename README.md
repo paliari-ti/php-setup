@@ -307,8 +307,7 @@ class AppSetup implements AppSetupInterface
 
     protected static function setup(App $app): void
     {
-        define('ROOT_APP', dirname(__DIR__));
-        Database::register($app->getContainer());
+        DbSetup::configure(DbSettings::get());
         Registers::register($app->getContainer());
         Router::register($app);
     }
