@@ -115,7 +115,7 @@ class QB extends RansackQueryBuilder
     /**
      * @return int
      */
-    public function getPerPage(): void
+    public function getPerPage(): int
     {
         return $this->_per_page;
     }
