@@ -2,6 +2,7 @@
 
 namespace Paliari\PhpSetup\Db\VO;
 
+use Paliari\PhpSetup\Db\Convert;
 use Paliari\Utils\VO\AbstractVO;
 
 class PaginatedVO extends AbstractVO
@@ -26,5 +27,10 @@ class PaginatedVO extends AbstractVO
      * @var array
      */
     public $rows = [];
+
+    public function toJson()
+    {
+        return Convert::toJson($this->toArray());
+    }
 
 }
