@@ -28,6 +28,11 @@ class PaginatedVO extends AbstractVO
      */
     public $rows = [];
 
+    public function asJson()
+    {
+        return Convert::asJson($this->toArray());
+    }
+
     public function toJson()
     {
         return Convert::toJson($this->toArray());
