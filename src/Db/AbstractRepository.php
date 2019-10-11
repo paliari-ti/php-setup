@@ -73,7 +73,7 @@ abstract class AbstractRepository extends AbstractSingleton implements Repositor
      */
     public function delete($id, bool $throw = true): bool
     {
-        $model = $this->find($id, true);
+        $model = $this->find($id, $throw);
 
         return $model->destroy($throw);
     }
