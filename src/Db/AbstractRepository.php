@@ -7,7 +7,6 @@ use Paliari\Utils\AbstractSingleton;
 
 abstract class AbstractRepository extends AbstractSingleton implements RepositoryInterface
 {
-
     abstract protected function modelName(): string;
 
     protected function newModel(array $params)
@@ -44,7 +43,7 @@ abstract class AbstractRepository extends AbstractSingleton implements Repositor
      */
     public function update($id, array $params, bool $throw = true): bool
     {
-        $model = $this->find($id, true);
+        $model = $this->find($id, $throw);
         $model->setAttributes($params);
 
         return $this->save($model, $throw);
@@ -107,9 +106,6 @@ abstract class AbstractRepository extends AbstractSingleton implements Repositor
      */
     public function paginate(array $params, int $page = 1, array $as_json_includes = [], int $per_page = null): PaginatedVO
     {
-        $qb = $this->ransack($params);
-
-        return $qb->paginate($page, $as_json_includes, $per_page);
+        return $this->ransack($params)->paginate($page, $as_json_includes, $per_page);
     }
-
 }
