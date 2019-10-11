@@ -3,15 +3,16 @@
 namespace Paliari\PhpSetup\Db;
 
 use Paliari\PhpSetup\Db\VO\PaginatedVO;
+use Paliari\Utils\AbstractSingleton;
 
-abstract class AbstractRepository implements RepositoryInterface
+abstract class AbstractRepository extends AbstractSingleton implements RepositoryInterface
 {
 
-    abstract protected static function modelName(): string;
+    abstract protected function modelName(): string;
 
-    protected static function newModel(array $params)
+    protected function newModel(array $params)
     {
-        $model = static::modelName();
+        $model = $this->modelName();
 
         return new $model($params);
     }
@@ -24,10 +25,10 @@ abstract class AbstractRepository implements RepositoryInterface
      *
      * @return object
      */
-    public static function create(array $params, bool $throw = false)
+    public function create(array $params, bool $throw = false)
     {
-        $model = static::newModel($params);
-        static::save($model, $throw);
+        $model = $this->newModel($params);
+        $this->save($model, $throw);
 
         return $model;
     }
@@ -41,12 +42,12 @@ abstract class AbstractRepository implements RepositoryInterface
      *
      * @return bool
      */
-    public static function update($id, array $params, bool $throw = true): bool
+    public function update($id, array $params, bool $throw = true): bool
     {
-        $model = static::find($id, true);
+        $model = $this->find($id, true);
         $model->setAttributes($params);
 
-        return static::save($model, $throw);
+        return $this->save($model, $throw);
     }
 
     /**
@@ -57,7 +58,7 @@ abstract class AbstractRepository implements RepositoryInterface
      *
      * @return bool
      */
-    public static function save($model, bool $throw = false): bool
+    public function save($model, bool $throw = false): bool
     {
         return $model->save($throw);
     }
@@ -70,16 +71,16 @@ abstract class AbstractRepository implements RepositoryInterface
      *
      * @return bool
      */
-    public static function delete($id, bool $throw = true): bool
+    public function delete($id, bool $throw = true): bool
     {
-        $model = static::find($id, true);
+        $model = $this->find($id, true);
 
         return $model->destroy($throw);
     }
 
-    public static function find($id, bool $throw = false)
+    public function find($id, bool $throw = false)
     {
-        $model = static::modelName();
+        $model = $this->modelName();
 
         return $model::find($id, $throw);
     }
@@ -89,9 +90,9 @@ abstract class AbstractRepository implements RepositoryInterface
      *
      * @return QB
      */
-    public static function ransack(array $params)
+    public function ransack(array $params)
     {
-        $model = static::modelName();
+        $model = $this->modelName();
 
         return $model::ransack($params);
     }
@@ -104,9 +105,9 @@ abstract class AbstractRepository implements RepositoryInterface
      *
      * @return PaginatedVO
      */
-    public static function paginate(array $params, int $page = 1, array $as_json_includes = [], int $per_page = null): PaginatedVO
+    public function paginate(array $params, int $page = 1, array $as_json_includes = [], int $per_page = null): PaginatedVO
     {
-        $qb = static::ransack($params);
+        $qb = $this->ransack($params);
 
         return $qb->paginate($page, $as_json_includes, $per_page);
     }
