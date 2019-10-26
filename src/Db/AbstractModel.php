@@ -108,6 +108,7 @@ class AbstractModel implements ModelInterface
      * @param mixed    $id
      * @param int      $lockMode
      * @param int|null $lockVersion
+     * @param bool     $throw
      *
      * @return $this
      * @throws ORMException
@@ -115,9 +116,9 @@ class AbstractModel implements ModelInterface
      * @throws TransactionRequiredException
      * @throws NotFoundException
      */
-    public static function findLock($id, $lockMode = LockMode::PESSIMISTIC_WRITE, $lockVersion = null)
+    public static function findLock($id, $lockMode = LockMode::PESSIMISTIC_WRITE, $lockVersion = null, $throw = true)
     {
-        return static::find($id, true, $lockMode, $lockVersion);
+        return static::find($id, $throw, $lockMode, $lockVersion);
     }
 
     /**
