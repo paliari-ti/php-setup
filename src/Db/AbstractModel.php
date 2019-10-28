@@ -116,7 +116,7 @@ class AbstractModel implements ModelInterface
      * @throws TransactionRequiredException
      * @throws NotFoundException
      */
-    public static function findLock($id, $lockMode = LockMode::PESSIMISTIC_WRITE, $lockVersion = null, $throw = true)
+    public static function findLock($id, $lockMode = LockMode::PESSIMISTIC_WRITE, $lockVersion = null, $throw = false)
     {
         return static::find($id, $throw, $lockMode, $lockVersion);
     }
