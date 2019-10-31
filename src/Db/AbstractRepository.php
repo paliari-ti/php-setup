@@ -97,6 +97,18 @@ abstract class AbstractRepository extends AbstractSingleton implements Repositor
     }
 
     /**
+     * @param array $params
+     *
+     * @return QB
+     */
+    public function ransackForUpdate(array $params)
+    {
+        $model = $this->modelName();
+
+        return $model::ransackForUpdate($params);
+    }
+
+    /**
      * @param array    $params
      * @param int      $page
      * @param array    $as_json_includes
