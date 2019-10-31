@@ -24,6 +24,13 @@ interface RepositoryInterface
      */
     public function ransack(array $params);
 
+    /**
+     * @param array $params
+     *
+     * @return QB
+     */
+    public function ransackForUpdate(array $params);
+
     public function paginate(array $params, int $page = 1, array $as_json_includes = [], int $per_page = null): PaginatedVO;
 
 }
