@@ -108,6 +108,13 @@ abstract class AbstractRepository extends AbstractSingleton implements Repositor
         return $model::ransackForUpdate($params);
     }
 
+    public function exists(array $ransack_params): bool
+    {
+        $model = $this->modelName();
+
+        return $model::exists($ransack_params);
+    }
+
     /**
      * @param array    $params
      * @param int      $page
