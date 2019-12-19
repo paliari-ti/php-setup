@@ -27,7 +27,7 @@ use Doctrine\Common\Persistence\Mapping\MappingException,
  *
  * @package Paliari\PhpSetup\Db
  */
-class AbstractModel implements ModelInterface
+abstract class AbstractModel implements ModelInterface
 {
 
     use TraitValidatorModel;
@@ -58,8 +58,8 @@ class AbstractModel implements ModelInterface
     public function setAttributes($attributes)
     {
         foreach ((array)$attributes as $name => $value) {
-            if ($this->hasField($name)) {
-                if (preg_match("/(.+)(_id$)/", $name, $matches) && $this->hasAssociation($matches[1])) {
+            if (static::hasField($name)) {
+                if (preg_match("/(.+)(_id$)/", $name, $matches) && static::hasAssociation($matches[1])) {
                     if (!BaseValidator::instance()->isBlank($value)) {
                         $klass = static::targetEntity($matches[1]);
                         $this->setAssociation($matches[1], $klass::find($value));
@@ -67,12 +67,28 @@ class AbstractModel implements ModelInterface
                 } else {
                     $this->$name = $this->prepareSetValue($value, static::typeOfField($name));
                 }
-            } else if ($this->hasAssociation($name)) {
+            } else if (static::hasAssociation($name)) {
+                $this->setAssociations($name, $value);
+            } else if (static::hasCustomAssociation($name)) {
                 $this->setAssociations($name, $value);
             }
         }
 
         return $this;
+    }
+
+    /**
+     * @param string $property
+     *
+     * @return bool
+     */
+    public static function hasCustomAssociation($property)
+    {
+        return false;
+    }
+
+    protected function setCustomAssociations($name, $value)
+    {
     }
 
     /**
