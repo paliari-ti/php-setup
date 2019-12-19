@@ -1,6 +1,6 @@
 {
     "name": "paliari/php-setup",
-    "version": "0.1.9",
+    "version": "0.1.10",
     "description": "Setup basico para padronizar projeto",
     "type": "library",
     "license": "MIT",
