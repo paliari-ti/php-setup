@@ -70,7 +70,7 @@ abstract class AbstractModel implements ModelInterface
             } else if (static::hasAssociation($name)) {
                 $this->setAssociations($name, $value);
             } else if (static::hasCustomAssociation($name)) {
-                $this->setAssociations($name, $value);
+                $this->setCustomAssociations($name, $value);
             }
         }
 
